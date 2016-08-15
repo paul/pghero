@@ -35,7 +35,14 @@ module PgHero
       end
 
       def query_stats_readable?
-        select_all("SELECT has_table_privilege(current_user, 'pg_stat_statements', 'SELECT')").first["has_table_privilege"] == "t"
+        has_table_privilege = select_all("SELECT has_table_privilege(current_user, 'pg_stat_statements', 'SELECT')").first["has_table_privilege"]
+
+        case has_table_privilege
+        when String    then has_table_privilege == 't'
+        when TrueClass then has_table_privilege
+        else
+          false
+        end
       rescue ActiveRecord::StatementInvalid
         false
       end
